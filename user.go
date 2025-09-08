@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"math/rand"
-	"strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -12,25 +11,23 @@ import (
 type User struct {
 	Email    string
 	Password string
-	Values   map[string]string
+	Keys     []string
 }
 
 var users = []User{
-	{Email: "user10@test.com", Password: "test", Values: generateValues(10)},
-	{Email: "user25@test.com", Password: "test", Values: generateValues(25)},
-	{Email: "user50@test.com", Password: "test", Values: generateValues(50)},
-	{Email: "user100@test.com", Password: "test", Values: generateValues(100)},
-	{Email: "user200@test.com", Password: "test", Values: generateValues(200)},
+	{Email: "user10@test.com", Password: "test", Keys: generateKeys(10)},
+	{Email: "user25@test.com", Password: "test", Keys: generateKeys(25)},
+	{Email: "user50@test.com", Password: "test", Keys: generateKeys(50)},
+	{Email: "user100@test.com", Password: "test", Keys: generateKeys(100)},
+	{Email: "user200@test.com", Password: "test", Keys: generateKeys(200)},
 }
 
-func generateValues(n int) map[string]string {
-	result := make(map[string]string)
-	for i := 1; i <= n; i++ {
-		key := "key" + strconv.Itoa(i)
-		value := randomString(8)
-		result[key] = value
+func generateKeys(n int) []string {
+	keys := make([]string, n)
+	for i := 0; i < n; i++ {
+		keys[i] = randomString(8)
 	}
-	return result
+	return keys
 }
 
 func randomString(length int) string {
@@ -72,7 +69,7 @@ func insertUserValues(db *sql.DB) error {
 			continue // skip if not matching pattern
 		}
 
-		values := generateValues(n)
+		values := generateKeys(n)
 		for k, v := range values {
 			_, err := db.Exec("INSERT INTO user_values (user_id, key, value) VALUES ($1, $2, $3)", id, k, v)
 			if err != nil {

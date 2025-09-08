@@ -52,3 +52,25 @@ func login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 }
+
+func userInfo(w http.ResponseWriter, r *http.Request) {
+	tokenStr := r.Header.Get("GoToken")
+	if tokenStr == "" {
+		http.Error(w, "Missing GoToken header", http.StatusUnauthorized)
+		return
+	}
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (any, error) {
+		return jwtKey, nil
+	})
+	if err != nil || !token.Valid {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+	user := findUser(claims.Email, "")
+	if user == nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(user)
+}

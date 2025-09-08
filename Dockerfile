@@ -5,7 +5,6 @@ COPY . .
 
 RUN go mod download
 RUN go install github.com/air-verse/air@latest
-# RUN go build -o server .
 
 EXPOSE 8081
 
