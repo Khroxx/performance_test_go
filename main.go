@@ -72,7 +72,7 @@ func main() {
 }
 
 func buildConnectionString() string {
-	host := getenvDefault("DB_HOST", "db")
+	host := getenvDefault("DB_HOST", "localhost")
 	port := getenvDefault("DB_PORT", "5432")
 	user := getenvDefault("DB_USER", "testuser")
 	password := getenvDefault("DB_PASSWORD", "testpassword")

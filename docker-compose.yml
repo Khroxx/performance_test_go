@@ -1,25 +1,14 @@
 services:
   gobackend:
     build: .
-    depends_on:
-      - db
     environment:
-      DB_HOST: db
+      DB_HOST: host.docker.internal
       DB_PORT: 5432
       DB_USER: testuser
       DB_PASSWORD: testpassword
       DB_NAME: testdb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8081:8081"
-  db:
-    image: postgres:17
-    restart: always
-    environment:
-      POSTGRES_DB: testdb
-      POSTGRES_USER: testuser
-      POSTGRES_PASSWORD: testpassword
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
