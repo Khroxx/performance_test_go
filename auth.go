@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -54,9 +55,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func userInfo(w http.ResponseWriter, r *http.Request) {
-	tokenStr := r.Header.Get("GoToken")
+	tokenStr := extractToken(r)
 	if tokenStr == "" {
-		http.Error(w, "Missing GoToken header", http.StatusUnauthorized)
+		http.Error(w, "Missing token", http.StatusUnauthorized)
 		return
 	}
 	claims := &Claims{}
@@ -73,4 +74,18 @@ func userInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(user)
+}
+
+func extractToken(r *http.Request) string {
+	customToken := r.Header.Get("GoToken")
+	if customToken != "" {
+		return customToken
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		return strings.TrimPrefix(authHeader, "Bearer ")
+	}
+
+	return ""
 }
