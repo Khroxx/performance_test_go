@@ -2,14 +2,18 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	// "github.com/gorilla/mux"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
+
+var appDB *sql.DB
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
@@ -46,16 +50,13 @@ func waitForDB(connStr string, maxAttempts int, delay time.Duration) (*sql.DB, e
 }
 
 func main() {
-	connStr := "host=db port=5432 user=testuser password=testpassword dbname=testdb sslmode=disable"
+	connStr := buildConnectionString()
 	db, err := waitForDB(connStr, 20, 2*time.Second)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
-
-	if err := insertUserValues(db); err != nil {
-		log.Fatal(err)
-	}
+	appDB = db
+	defer appDB.Close()
 
 	// Mit CORS
 	router := mux.NewRouter()
@@ -68,4 +69,22 @@ func main() {
 	// http.HandleFunc("/", home)
 	// http.HandleFunc("/login", login)
 	// http.ListenAndServe(":8081", nil)
+}
+
+func buildConnectionString() string {
+	host := getenvDefault("DB_HOST", "db")
+	port := getenvDefault("DB_PORT", "5432")
+	user := getenvDefault("DB_USER", "testuser")
+	password := getenvDefault("DB_PASSWORD", "testpassword")
+	database := getenvDefault("DB_NAME", "testdb")
+
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, database)
+}
+
+func getenvDefault(key, fallback string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
+	}
+	return value
 }

@@ -12,8 +12,7 @@ services:
     ports:
       - "8081:8081"
   db:
-  # PSQL 17 as of september 2025
-    image: postgres:latest
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_DB: testdb
